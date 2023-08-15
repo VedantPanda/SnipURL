@@ -1,0 +1,23 @@
+<% layout('layouts/boilerplate') %>
+<% if(urls.length){ %>
+    <table class="table table-striped table-responsive">
+        <thead>
+            <tr>
+                <th>Full Url</th>
+                <th>Short Url</th>
+                <th>Clicks</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(let url of urls){ %>
+                <tr>
+                    <td><a href="<%= url.fullUrl %>" target="_blank"><%= url.fullUrl %></a></td>
+                    <td><a href="/<%= url.shortId %>" target="_blank"><%= url.shortId %></a></td>
+                    <td><%= url.clicks %></td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+<% } else { %>
+    <h2>No links yet!</h2>
+<% } %>

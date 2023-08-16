@@ -4,9 +4,13 @@ const port = 3000;
 const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const urlModel = require('./models/urls');
-const shortid = require('shortid');
 const ejsMate = require('ejs-mate');
+const session = require('express-session');
+const urlRoutes = require('./routes/url');
+const userRoutes = require('./routes/user');
+const passport = require('passport');
+const localStrategy = require('passport-local');
+const User = require('./models/users');
 
 mongoose.connect('mongodb://127.0.0.1:27017/Url-Shortener',{
     useNewUrlParser:true,
@@ -27,35 +31,33 @@ app.set('views',path.join(__dirname,'views'));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get("/home", async (req,res) => {
-    res.render("home");
+const configSession = {
+    secret:"secret-key",
+    resave:false,
+    saveUninitialized:true,
+    cookie:{
+        httpOnly:true,
+        expires:Date.now() + 1000*60*60*24*7,
+        maxAge:1000*60*60*24*7
+    }
+}
+
+app.use(session(configSession));
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use((req,res,next)=>{
+    res.locals.currentUser = req.user;
+    next();
 })
 
-app.get("/aboutus",(req,res)=>{
-    res.render("aboutUs");
-})
-
-app.get("/myUrls", async (req,res) => {
-    const urls = await urlModel.find({});
-    res.render("myurls",{urls});
-})
-
-app.post("/generateUrl", async (req,res)=>{
-    const {url} = req.body;
-    const shortId = shortid();
-    const newUrl = await new urlModel({fullUrl:url,shortId:shortId,clicks:0});
-    await newUrl.save();
-    res.redirect("home");
-})
-
-app.get("/:shortId",async (req,res)=>{
-    const {shortId} = req.params;
-    const foundUrl = await urlModel.findOne({shortId:shortId});
-    foundUrl.clicks+=1;
-    await foundUrl.save();
-    const redirectUrl = foundUrl.fullUrl;
-    res.redirect(redirectUrl);
-})
+app.use("/urlShortener",urlRoutes);
+app.use("/",userRoutes);
 
 app.listen(port,()=>{
     console.log("Server Started");

@@ -12,7 +12,7 @@
             <% for(let url of urls){ %>
                 <tr>
                     <td><a href="<%= url.fullUrl %>" target="_blank"><%= url.fullUrl %></a></td>
-                    <td><a href="/<%= url.shortId %>" target="_blank"><%= url.shortId %></a></td>
+                    <td><a href="/urlShortener/home/<%= url.shortId %>" target="_blank"><%= url.shortId %></a></td>
                     <td><%= url.clicks %></td>
                 </tr>
             <% } %>

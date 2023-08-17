@@ -11,6 +11,8 @@ const userRoutes = require('./routes/user');
 const passport = require('passport');
 const localStrategy = require('passport-local');
 const User = require('./models/users');
+const ExpressError = require('./utils/ExpressError');
+const flash = require('connect-flash');
 
 mongoose.connect('mongodb://127.0.0.1:27017/Url-Shortener',{
     useNewUrlParser:true,
@@ -30,6 +32,7 @@ app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'views'));
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname,'public')));
 
 const configSession = {
     secret:"secret-key",
@@ -43,6 +46,7 @@ const configSession = {
 }
 
 app.use(session(configSession));
+app.use(flash());
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -53,11 +57,25 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use((req,res,next)=>{
     res.locals.currentUser = req.user;
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
     next();
 })
 
 app.use("/urlShortener",urlRoutes);
 app.use("/",userRoutes);
+
+app.all("*",(req,res,next)=>{
+    next(new ExpressError("Page not found",404));
+})
+
+app.use((err,req,res,next) => {
+    const {statusCode=500} = err;
+    if(!err.message){
+        err.message = "Something went wrong!";
+    }
+    res.status(statusCode).render('errors',{err});
+})
 
 app.listen(port,()=>{
     console.log("Server Started");

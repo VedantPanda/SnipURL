@@ -17,7 +17,7 @@ module.exports.loginForm = (req,res) => {
 }
 
 module.exports.loginUser = (req,res) => {
-    res.redirect("/urlShortener/home");
+    res.redirect("/snipUrl/home");
 }
 
 module.exports.logoutUser = (req, res, next) => {

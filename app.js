@@ -62,7 +62,7 @@ app.use((req,res,next)=>{
     next();
 })
 
-app.use("/urlShortener",urlRoutes);
+app.use("/snipUrl",urlRoutes);
 app.use("/",userRoutes);
 
 app.all("*",(req,res,next)=>{

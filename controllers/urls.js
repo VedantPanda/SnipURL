@@ -33,7 +33,8 @@ module.exports.generateUrl = catchAsync(async (req,res)=>{
             const shortId = shortid();
             const newUrl = await new urlModel({fullUrl:url,shortId:shortId,clicks:0,user:req.user._id});
             await newUrl.save();
-            res.redirect("/urlShortener/home");
+            req.flash('success','Successfully Shortened the Url')
+            res.redirect("/snipUrl/myurls");
         }
     }
 })
